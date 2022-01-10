@@ -16,16 +16,15 @@
                             <td>
                                 <div class="modul" >
                                     <p style="margin-top: 0px; margin-bottom:0px; margin-left:0px; padding-top:0px; padding-bottom: 0px; margin-right:auto;width: 88px;">
-                                        <a href="https://monitoring.solaredge.com" target="_blank"><img id="id_PV_IconModule" src="pics/pv/Modul_Active.png" width=53 height=29 ></a>
-                                        
+                                        <a href="https://monitoring.solaredge.com/solaredge-web/p/site/513415/#/dashboard" target="_blank"><img id="id_PV_IconModule" src="pics/pv/Modul_Active.png" width=53 height=29 ></a>
                                         <h2>
                                             {{ basic.print('', 'Photovoltaik.Modul_Leistung', '%01,2f kW') }} 
                                         </h2>
-                                        
                                             <div class="block" style="margin-top: 0px; margin-bottom:0px; margin-left:0px; padding-top:0px; padding-bottom: 0px; width: 100%;">
                                             </div>
                                     </p>
                                 </div>
+                                
                             </td>
                         </tr>
                         <tr>
@@ -49,27 +48,30 @@
                                     </div>
                                     
                                     <script type="text/javascript">
-                                        $(document).on('pagecreate', function (bevent, bdata) {
-                                            $(bevent.target).find('[data-widget="PV_Speicher_Widget"]').on( {
-                                            'update': function (event, response) {
-                                                event.stopPropagation();
-                                                
-                                                //console.debug("[PV_Speicher_Widget] update");
-                                                //var val = $(this).attr('data-item');
-                                                if(response.length == 1) // all values as list in one item
-                                                    var val = response[0];
-                                                else 
-                                                    return;
-                                                console.debug("[PV_Speicher_Widget] " + val);
-                                                if (val == 4)
-                                                    document.getElementById('id_PV_Speicher_Status').style.color = 'orange';
-                                                else if (val == 3)
-                                                    document.getElementById('id_PV_Speicher_Status').style.color = '#0C0';
-                                                else
-                                                    document.getElementById('id_PV_Speicher_Status').style.color = 'white';
-                                                }
-                                            });
-                                        });
+                                    $.widget("sv.pv_speicher_widget", $.sv.widget, {
+                                        initSelector: 'div[data-widget="PV_Speicher_Widget"]',
+
+                                        options: {
+                                            'data_item': $(this).attr('data-send')
+                                        },
+
+                                        _update: function (response) {
+                                            var ul = this.element.children('ul:first').empty();
+                                            if(response.length == 1) // all values as list in one item
+                                                var val = response[0];
+                                            else 
+                                                return;
+                                            console.debug("[PV_Speicher_Widget] " + val);
+                                            if (val == 4)
+                                                document.getElementById('id_PV_Speicher_Status').style.color = 'orange';
+                                            else if (val == 3)
+                                                document.getElementById('id_PV_Speicher_Status').style.color = '#0C0';
+                                            else
+                                                document.getElementById('id_PV_Speicher_Status').style.color = 'white';
+                                            ul.trigger('prepare').listview('refresh').trigger('redraw');
+                                        },
+                                    });
+                                        
                                     </script>
 
                                     
@@ -96,13 +98,12 @@
                             
                             <div class="pfeil_netz_Import" id="id_PV_Pfeil_Netz_Import">
                                 <p style="position: absolute; ">
-                                    {{ basic.symbol('', 'Photovoltaik.Zaehler_Leistung.StatusEinspeisen', '', 'control_centr_arrow_left.svg', 0, '', '#C00') }}  
                                 </p>
                             </div>
                             
                              <div class="pfeil_netz_Export" id="id_PV_Pfeil_Netz_Export">
                                 <p style="position: absolute; ">
-                                    {{ basic.symbol('', 'Photovoltaik.Zaehler_Leistung.StatusEinspeisen', '', 'control_centr_arrow_right.svg', 1, '', '#0C0') }}  
+                                    {{ basic.symbol('', 'Photovoltaik.Zaehler_Leistung.Status', ['','',''], ['control_centr_arrow_right.svg','','control_centr_arrow_left.svg'], [1,0,2], '', ['#0C0','','#C00']) }}
                                 </p>
                             </div>
                             
@@ -128,44 +129,56 @@
                             {{ basic.print('', 'Photovoltaik.Zaehler_Leistung', '%01,2f kW') }}
                         </h1>
                         
-                        <div class="PV_Zaehler_Status" id="id_PV_Zaehler_Status" data-widget="PV_Zaehler_Status_Widget" data-item="{{ 'Photovoltaik.Zaehler_Leistung.StatusEinspeisen' }}">
-                            {{ basic.print('', 'Photovoltaik.Zaehler_Leistung.StatusText', 'text', '', '' ,'') }}
+                        <div class="PV_Zaehler_Status" id="id_PV_Zaehler_Status" data-widget="PV_Zaehler_Status_Widget" data-item="{{ 'Photovoltaik.Zaehler_Leistung.Status' }}">
+                            {{ basic.symbol('', 'Photovoltaik.Zaehler_Leistung.Status', ['Export','','Import'], ['','',''], [1,0,2], '', ['#0C0','','#C00']) }}
                         </div>
                         
                         <script type="text/javascript">
-                            $(document).on('pagecreate', function (bevent, bdata) {
-                                $(bevent.target).find('[data-widget="PV_Zaehler_Status_Widget"]').on( {
-                                'update': function (event, response) {
-                                    event.stopPropagation();
-                                    
-                                    if(response.length == 1) // all values as list in one item
-                                        var val = response[0];
-                                    else 
-                                        return;
-                                    //console.debug("[PV_Zaehler_Status_Widget] " + val);
-                                    if (val == 0)
-                                        document.getElementById('id_PV_Zaehler_Status').style.color = '#C00';
-                                    else
-                                        document.getElementById('id_PV_Zaehler_Status').style.color = '#0C0';
+                            $.widget("sv.pv_zaehler_speicher_widget", $.sv.widget, {
+                            initSelector: 'div[data-widget="PV_Zaehler_Status_Widget"]',
 
-                                    var iconHaus = $('#id_PV_IconHaus');
-                                    var iconBattery = $('#id_PV_IconBattery');
-                                    var offsetHaus = iconHaus.offset();
-                                    var offsetBattery = iconBattery.offset();
+                            options: {
+                                'data_item': $(this).attr('data-send')
+                            },
 
-                                    //console.debug("[PV_Zaehler_Status_Widget] Haus Offsetleft: " + offsetHaus.left + ", top: " + offsetHaus.top);
-                                    //console.debug("[PV_Speicher_Widget] Offsetleft: " + offsetBattery.left + ", top: " + offsetBattery.top);
+                            _update: function (response) {
+                                var ul = this.element.children('ul:first').empty();
+                                //console.debug("[PV_Zaehler_Status_Widget] update");
+                                //var val = $(this).attr('data-item');
+                                //if(response.length == 1) // all values as list in one item
+                                //    var val = response[0];
+                                //else 
+                                //    return;
+                                //console.debug("[PV_Zaehler_Status_Widget] " + val);
+                                //if (val == 0)
+                                //    document.getElementById('id_PV_Zaehler_Status').style.color = '#C00';
+                                //else
+                                //    document.getElementById('id_PV_Zaehler_Status').style.color = '#0C0';
+                                //var iconModul = $('#id_PV_IconModule');
+                                //var iconNetz = $('#id_PV_IconNetz');
+                                var iconHaus = $('#id_PV_IconHaus');
+                                var iconBattery = $('#id_PV_IconBattery');
+                                //var offsetModul = iconModul.offset();
+                                //var offsetNetz = iconNetz.offset();
+                                var offsetHaus = iconHaus.offset();
+                                var offsetBattery = iconBattery.offset();
+                                //console.debug("[PV_Zaehler_Status_Widget] Modul Offsetleft: " + offsetModul.left + ", top: " + offsetModul.top);
+                                //console.debug("[PV_Zaehler_Status_Widget] Netz Offsetleft: " + offsetNetz.left + ", top: " + offsetNetz.top);
+                                console.debug("[PV_Zaehler_Status_Widget] Haus Offsetleft: " + offsetHaus.left + ", top: " + offsetHaus.top);
+                                console.debug("[PV_Speicher_Widget] Offsetleft: " + offsetBattery.left + ", top: " + offsetBattery.top);
 
-                                    $('#id_PV_Pfeil_Bezug_Modul').offset({ top: offsetHaus.top-60, left: offsetHaus.left-23 });
-                                    $('#id_PV_Pfeil_Bezug_Batterie').offset({ top: offsetHaus.top+60, left: offsetHaus.left-23 });
-                                    $('#id_PV_Pfeil_Netz_Import').offset({ top: offsetHaus.top-10, left: offsetHaus.left+60 });
-                                    $('#id_PV_Pfeil_Netz_Export').offset({ top: offsetHaus.top-10, left: offsetHaus.left+72 });
-                                    $('#id_PV_IconBattery_Laden').offset({ top: offsetHaus.top-7, left: offsetHaus.left-80 });
-                                    
-                                    }
-                                });
-                            });
+                                $('#id_PV_Pfeil_Bezug_Modul').offset({ top: offsetHaus.top-60, left: offsetHaus.left-23 });
+                                $('#id_PV_Pfeil_Bezug_Batterie').offset({ top: offsetHaus.top+60, left: offsetHaus.left-23 });
+                                $('#id_PV_Pfeil_Netz_Import').offset({ top: offsetHaus.top-10, left: offsetHaus.left+60 });
+                                $('#id_PV_Pfeil_Netz_Export').offset({ top: offsetHaus.top-10, left: offsetHaus.left+72 });
+                                $('#id_PV_IconBattery_Laden').offset({ top: offsetHaus.top-7, left: offsetHaus.left-80 });
+                                                    
+                                ul.trigger('prepare').listview('refresh').trigger('redraw');
+                            },
+                        });
                         </script>
+            
+                        
                     </p>
                 </td>
             </tr>
@@ -175,3 +188,4 @@
     
 
 {% endmacro %}
+
