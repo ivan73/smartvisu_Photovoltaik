@@ -25,6 +25,7 @@ Photovoltaik:
         eval: value*10**sh.Photovoltaik.DC_Leistung_sf()
         enforce_updates: True
         modBusAddress: 40100
+        modBusDataType: int16
         modBusFactor: 0.001
     Inverter_Temperatur_sf: 
         type: num
@@ -54,6 +55,7 @@ Photovoltaik:
         database_maxage: 365
         eval: value*10**sh.Photovoltaik.Zaehler_Strom_sf()
         modBusAddress: 40190
+        modBusDataType: int16
     Zaehler_Spannung_sf: 
         type: num
         name: M_AC_Voltage_SF
@@ -68,6 +70,7 @@ Photovoltaik:
         database_maxage: 365
         eval: value*10**sh.Photovoltaik.Zaehler_Spannung_sf()
         modBusAddress: 40195
+        modBusDataType: int16
     Zaehler_Frequenz_sf: 
         type: num
         name: M_AC_Freq_SF
@@ -82,6 +85,7 @@ Photovoltaik:
         database_maxage: 365
         eval: value*10**sh.Photovoltaik.Zaehler_Frequenz_sf()
         modBusAddress: 40204
+        modBusDataType: int16
     Zaehler_Leistung_sf: 
         type: num
         name: M_AC_Power_SF
